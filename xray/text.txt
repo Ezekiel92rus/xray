@@ -1,0 +1,556 @@
+
+
+
+
+    https://www.youtube.com/watch?v=VFuLa0yAvoc
+
+			mov    esi,[pData]
+			movzx  edi,word[esi+1]    ;eax edx esi edi
+			lea    edi,[edi+esi+4]
+			add    esi,6
+.packet_loop:
+			add   byte[ebx+CLIENT.PacketEvE],1
+					movzx eax,byte[esi]
+					cmp	al,8
+					jne .skip_packet
+							add	byte[ebx+CLIENT.PacketADD],1
+							cmp	byte[ebx+CLIENT.pConnectOK],1
+							jne	.packet_time
+							or   edx,edx
+							je	.packet_time
+							mov  eax,[esi+2]
+							sub  eax,edx
+							cmp  eax,0x250
+							ja   .bag_packet
+.packet_time:
+				mov  edx,[esi+2]
+				movzx eax,byte[esi+6]
+.skip_packet: 
+
+
+
+
+
+
+
+
+
+
+
+
+https://www.youtube.com/watch?v=V-lkAXgRML8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mov esi,[xrCore.dll]
+		add esi,0x1CC85
+		invoke VirtualProtect,esi,1,PAGE_EXECUTE_READWRITE,Buff
+		invoke RtlFillMemory,esi,1,0x90	
+		mov dword[0x00503FD4],1 ; Thread XZ
+		stdcall	 JumpTo,[xr_3da.exe],0x5A3A0,quit,0  
+		stdcall    JumpTo,[xrNetServer.dll],0x9E97,AddClientClass,0
+		stdcall    JumpTo,[xrNetServer.dll],0x9EBA,DelClientClass,1
+		stdcall    JumpTo,DelClientClassEnd,[xrNetServer.dll],0x9EC0,0
+
+
+
+
+
+
+
+
+
+
+;===================================================================================================================
+AddClientClass:
+	pushad
+	invoke RtlEnterCriticalSection,RTL_CRITICAL_SECTION
+     popad
+     lea  eax,[ecx+4]
+     stdcall   ReNamePlayer,eax
+     push ecx
+     mov  ecx,ebx
+     call edx
+     test eax,eax
+     je   add_client_class_ret
+     xchg edi,eax
+     stdcall GetClientID,dword[edi+0x40A8]
+     or eax,eax
+     jne	add_client_class_ret
+     stdcall AddClientID,dword[edi+0x40A8] ;ID
+     or	eax,eax
+     je   add_client_class_ret
+     xchg esi,eax
+     mov  [esi+CLIENT.ADDR],edi
+     lea  ebx,[esi+CLIENT.StrIP]
+     lea  eax,[edi+0x40A8+0x94]    ;IP 
+	invoke   RtlIpv4AddressToString,eax,ebx
+     mov  eax,[edi+0x412C]
+     lea  eax,[eax+0x0C]
+     lea  ebx,[esi+CLIENT.NAME]
+     invoke    RtlMoveMemory,ebx,eax,CLIENT.NAME.size
+     mov  eax,[edi+0x40A8]
+     lea  ebx,[esi+CLIENT.StrID]
+     cinvoke wsprintf,ebx,formath,eax
+     mov  eax,[edi+0x4028+0x118]	;port
+     lea  ebx,[esi+CLIENT.StrPort]
+     cinvoke wsprintf,ebx,formatd,eax
+     mov  eax,[edi+0x4148]
+     mov  [esi+CLIENT.NETADDR],eax
+     invoke SendMessage,[hList],LVM_INSERTITEM,0, lvi
+add_client_class_ret:
+	pushad
+	invoke RtlLeaveCriticalSection,RTL_CRITICAL_SECTION 
+     popad
+     xor eax,eax
+     pop edi
+     pop esi
+     pop ebx
+     mov esp,ebp
+     pop ebp
+     ret 0008
+;===================================================================================================================
+DelClientClass:   
+     pushad
+     invoke RtlEnterCriticalSection,RTL_CRITICAL_SECTION
+     stdcall DelClientID,dword[esi+0x4]
+     or eax,eax
+     je @f
+     invoke SendMessage,[hList],LVM_DELETEITEM,NULL,0
+     @@:
+     invoke RtlLeaveCriticalSection,RTL_CRITICAL_SECTION 
+     popad
+     lea ebx,[ebx]
+DelClientClassEnd:
+     mov  eax,-1
+;===================================================================================================================
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        https://www.youtube.com/watch?v=we0idtoiyxY
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+   
+;***************************************************************************************************************
+proc SendClientPacket,pID,pData,pClass
+      push	esi edi ebx ecx edx
+      mov    esi,[pData]
+      movzx  edi,word[esi+1]    ;eax edx esi edi  
+      lea    edi,[edi+esi+4]
+      add    esi,6
+      xor    edx,edx
+      xor    ebx,ebx
+      xor    ecx,ecx
+.packet_loop:
+            cmp  byte [esi-2],0xC
+            jne  .data_packet
+            cmp  dword[esi],0x12071980
+            jne  .data_packet
+            cmp  dword[esi+4],0x26111975
+            jne  .data_packet  
+            cmp  dword[esi+8],00000001
+            jne  .data_packet       
+            sub  dword[esi+8],00000001     ; Battleye  
+.data_packet:
+            cmp  byte [esi-2],0x0C
+            jne  .packet_ok
+            cmp  byte [esi],0x15           ;GetHashKey
+            jne  .packet_ok 
+            ;mov  byte [esi],0x1E           ;CD-Key OK 
+.packet_ok:  
+.skip_packet:
+      movzx  eax,word[esi-2]
+      lea    esi,[esi+eax+2]
+      cmp    edi,esi
+ja   .packet_loop
+      xor  eax,eax
+      jmp  .packet_ret
+.bag_packet:
+      mov eax,1
+.packet_ret:
+      pop	edx ecx ebx edi esi
+      ret
+endp
+;***************************************************************************************************************
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        https://www.youtube.com/watch?v=cMEQp5BZHO8
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+   
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        cmp byte [eax+0x6],0x25 ;medick     .actor_dead:		   
+	                je  .chreck_for_dead_bag
+	                cmp byte [eax+0x6],0x24 ;change
+	                je  .chreck_for_dead_bag
+	                cmp byte [eax+0x6],0x22 ;change
+	                je  .chreck_for_dead_bag
+	                cmp byte [eax+0x6],0x21 ;change
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ;---------------------------------------------------------------------------------------------------------------
+	    ;stdcall    JumpTo,[xrNetServer.dll],0x9E5E,rename_connect_player,2
+	    ;stdcall    JumpTo,rename_connect_player_end,[xrNetServer.dll],0x9E65,0
+	    ;---------------------------------------------------------------------------------------------------------------
+	    ;mov    esi,[BugTrap.dll]
+	    ;add    esi,0x10F33
+	    ;invoke VirtualProtect,esi,1,PAGE_EXECUTE_READWRITE,Buff
+	    ;invoke RtlFillMemory,esi,0xB,0x90 ;BugTrap.BT_CallNetFilter+35CC Suspend 11 nop
+	    ;stdcall     JumpTo,[BugTrap.dll],0x18693,SendReports,2
+
+	    ;---------------------------------------------------------------------------------------------------------------
+	    mov eax,[xrNetServer.dll]
+	    add eax,0x9D42
+	    invoke RtlMoveMemory,NetHandlerWriteByte,eax,14
+	    stdcall  JumpTo,[xrNetServer.dll],0x9D42,NetHandler,2
+	    ;---------------------------------------------------------------------------------------------------------------
+
+
+   ;dNet_Handler:
+        ;Handler0  dd 0
+        ;Handler1  dd DisconnectClient
+        ;Handler2  dd ToConnect
+        ;Handler3  dd ChreckBan
+        ;Handler4  dd RecivePacket
+        ;Handler5  dd 0  ; xor eax,eax
+
+
+
+
+
+
+
+
+
+;********************************************************************************************
+proc EvEWeaponsCreate,pClass,pData
+iglobal
+   wStr           db 'Player: %s need change weapon %s',0
+   wStrData       db 0x13,0x00,0x24,0x00,0x00,0x00
+   wCollor        db '%c[0,255,0,255]'
+   wWeaponsBuff   rb 250h
+endg  
+		  push  ebx ecx edx esi edi
+		  xor eax,eax
+		  mov esi,[pData]
+
+            pushad
+                 lea esi,[esi+0xA]
+                 stdcall xrCorePMSG,esi,20h,2
+            popad
+            
+            
+            cmp byte [esi+0xA],2
+            jne  .by_weapon_loop_ok
+            
+            
+.by_weapon: 
+            movzx  ebx,byte[esi+0x10]
+.by_weapon_loop:
+            dec    ebx
+            cmp    ebx,30h
+            ja     .by_weapon_loop_ok
+            movzx  ecx,byte[esi+0x11+ebx*2]
+            cmp    ecx,41h
+            ja     .by_weapon_loop_bag
+            mov    edx,[pWEAPONS+ecx*4]
+            cmp    byte[edx-1],cl
+            jne    .by_weapon_loop
+            cmp    byte[edx-2],1    
+            jne    .by_weapon_loop
+            nop
+            mov    edi,[pClass]
+            mov    eax,[edi+0x4160]
+	       lea    eax,[eax+4]
+            cinvoke wsprintf,wWeaponsBuff,wStr,eax,edx
+            cmp     eax,0x1E0-7+16
+		  ja      .by_weapon_loop_bag
+            add     eax,7+16
+            stdcall SendTo,addr wStrData,eax,dword[edi+0x40A8]
+.by_weapon_loop_bag:
+            mov eax,1
+.by_weapon_loop_ok:
+            add eax,eax
+.by_weapon_loop_end:
+            pop  edi esi edx ecx ebx
+            ret
+endp
+;********************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NetHandler:
+iglobal
+        
+        pNetHandlerByte         db 0,5,1,2,5,5,5,3,5,5,4
+        pCALL_CreateClient      dd pCreateClient
+        pCALL_DisconnectClient  dd pDisconnectClient
+        pCALL_ToConnect         dd pToConnect
+        pCALL_ChreckBan         dd pChreckBan
+        pCALL_RecivePacket      dd pRecivePacket
+        pCALL_HandlerRet        dd pHandlerRet
+endg         
+        mov ecx,eax
+        movzx eax,byte[eax+pNetHandlerByte]
+        stdcall dword [pCALL_CreateClient+eax*4]
+        or  eax,eax
+        jne net_handler_ret
+        mov ecx,5
+net_handler_ret:
+        mov eax,ecx       
+        NetHandlerWriteByte rb 14  
+
+
+
+
+
+
+
+
+
+
+
+proc pCreateClient
+     xor eax,eax
+	 ret
+endp
+
+proc pDisconnectClient
+	xor eax,eax
+	ret
+endp
+
+proc pToConnect
+    xor eax,eax
+	ret
+endp
+
+proc pChreckBan
+    xor eax,eax
+	ret
+endp
+
+proc pRecivePacket
+    xor eax,eax
+	ret
+endp
+
+proc pHandlerRet
+    xor eax,eax
+	ret
+endp

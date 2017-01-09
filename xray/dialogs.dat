@@ -1,0 +1,10 @@
+  dialog dialog0,"FBASE",0,0,271,308,0x10c00800,0x00000088,,"MS Sans Serif",8
+    dialogitem "SysListView32","",IDC_LISTVIEW,3,83,264,185,0x1000a005,0x00000200
+    dialogitem "Edit","MESSAGE [CHAT, KICK, BAN]",IDC_MESSAGE,3,274,200,28,0x50011084,0x00000200
+    dialogitem "Button","Message",IDC_MESSAGE_SEND,207,274,61,28,0x10000000,0x00000008
+    dialogitem "Static","#12345",IDC_IMAGE,3,3,264,78,0x5000010e,0x00000000
+    dialogitem "SysListView32","",IDC_LISTVIEW2,164,84,104,195,0x50004001,0x00002200
+    dialogitem "ListBox","",IDC_LISTBOXCHAT,4,84,158,218,0x50004100,0x00000200
+    dialogitem "Button","CheckForUpdates",IDC_CHECKFORUPDATES,163,282,105,20,0x50008000,0x00000000
+  enddialog
+
